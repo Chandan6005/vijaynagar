@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}The Daily ePaper{% endblock %}</title>
+    <title>{% block title %}Vijayanagar Record{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -207,12 +207,12 @@
 
 <header class="site-header">
     <div class="header-top">
-        Established 2024 &bull; Your Trusted Digital Newspaper
+        Monthly Kannada Newspaper &bull; Editor: E.Rajesh
     </div>
     <div class="header-main">
         <div>
-            <a href="{% url 'home' %}" class="site-title">The Daily <span>ePaper</span></a>
-            <p class="site-tagline">All the news that's fit to read online</p>
+            <a href="{% url 'home' %}" class="site-title">Vijayanagar <span>Record</span></a>
+            <p class="site-tagline">Monthly Kannada Newspaper &mdash; Digital Edition</p>
         </div>
         <nav class="header-nav">
             <a href="{% url 'home' %}" class="nav-link">Home</a>
@@ -227,7 +227,7 @@
     <hr class="header-rule">
     <div class="header-date">
         <span>{% now "l, F j, Y" %}</span>
-        <span>Digital Edition</span>
+        <span>Editor: E.Rajesh &bull; Digital Edition</span>
     </div>
 </header>
 
@@ -242,7 +242,8 @@
 <main>{% block content %}{% endblock %}</main>
 
 <footer>
-    <p>&copy; {% now "Y" %} The Daily ePaper &mdash; <a href="{% url 'home' %}">Home</a> &bull; <a href="{% url 'admin_login' %}">Admin</a></p>
+    <p><strong style="color:#fff;">Vijayanagar Record</strong> &mdash; Monthly Kannada Newspaper</p>
+    <p style="margin-top:6px;">Editor: E.Rajesh &bull; &copy; {% now "Y" %} &bull; <a href="{% url 'home' %}">Home</a> &bull; <a href="{% url 'admin_login' %}">Admin</a></p>
 </footer>
 
 {% block extra_js %}{% endblock %}

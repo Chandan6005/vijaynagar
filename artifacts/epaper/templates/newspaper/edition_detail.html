@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{{ edition.title }} - The Daily ePaper{% endblock %}
+{% block title %}{{ edition.title }} - Vijayanagar Record{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -67,22 +67,13 @@
 
     .pdf-embed {
         width: 100%;
-        height: 80vh;
+        height: 85vh;
+        min-height: 600px;
         border: 1px solid var(--border);
         border-radius: 0 0 6px 6px;
         display: block;
         background: #525659;
     }
-
-    .pdf-fallback {
-        border: 1px solid var(--border);
-        border-radius: 0 0 6px 6px;
-        background: var(--white);
-        padding: 48px 24px;
-        text-align: center;
-    }
-
-    .pdf-fallback p { color: var(--muted); margin-bottom: 16px; }
 </style>
 {% endblock %}
 
@@ -113,17 +104,11 @@
         </div>
     </div>
 
-    <object class="pdf-embed" data="{{ edition.pdf_file.url }}" type="application/pdf">
-        <div class="pdf-fallback">
-            <p>Your browser cannot display this PDF inline. You can:</p>
-            <a href="{{ edition.pdf_file.url }}" download class="btn btn-primary">
-                Download PDF
-            </a>
-            &nbsp;
-            <a href="{{ edition.pdf_file.url }}" target="_blank" class="btn btn-outline">
-                Open in New Tab
-            </a>
-        </div>
-    </object>
+    <iframe
+        class="pdf-embed"
+        src="{{ edition.pdf_file.url }}"
+        title="{{ edition.title }}"
+        allowfullscreen>
+    </iframe>
 </div>
 {% endblock %}
