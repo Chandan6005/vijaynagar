@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% block title %}Home - The Daily ePaper{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        background: var(--ink);
+        color: var(--white);
+        padding: 48px 24px;
+        text-align: center;
+    }
+
+    .hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.4rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .hero p {
+        color: #ccc;
+        font-size: 1rem;
+        max-width: 520px;
+        margin: 0 auto 28px;
+    }
+
+    .search-bar {
+        max-width: 480px;
+        margin: 0 auto;
+        display: flex;
+        gap: 0;
+    }
+
+    .search-bar input {
+        flex: 1;
+        padding: 12px 18px;
+        border: 2px solid var(--border);
+        border-right: none;
+        border-radius: 4px 0 0 4px;
+        font-size: 0.95rem;
+        background: var(--white);
+        color: var(--ink);
+    }
+
+    .search-bar input:focus { outline: none; border-color: var(--accent); }
+
+    .search-bar button {
+        padding: 12px 20px;
+        background: var(--accent);
+        color: var(--white);
+        border: 2px solid var(--accent);
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+    }
+
+    .search-bar button:hover { background: var(--accent-light); }
+
+    .page-body {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 24px;
+    }
+
+    .section-rule {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .section-rule h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6rem;
+        white-space: nowrap;
+    }
+
+    .section-rule::before,
+    .section-rule::after {
+        content: '';
+        flex: 1;
+        height: 2px;
+        background: var(--border);
+    }
+
+    /* ===== LATEST EDITION ===== */
+    .latest-card {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 32px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 48px;
+        box-shadow: 0 4px 16px var(--shadow);
+    }
+
+    .latest-cover {
+        background: #e5e0d5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 260px;
+    }
+
+    .latest-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .cover-placeholder {
+        text-align: center;
+        padding: 24px;
+        color: var(--muted);
+    }
+
+    .cover-placeholder svg { opacity: 0.35; margin-bottom: 8px; }
+    .cover-placeholder span { font-size: 0.8rem; }
+
+    .latest-info {
+        padding: 32px 32px 32px 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .badge {
+        display: inline-block;
+        background: var(--accent);
+        color: var(--white);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 3px 10px;
+        border-radius: 2px;
+        margin-bottom: 12px;
+    }
+
+    .latest-info h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.9rem;
+        margin-bottom: 8px;
+        line-height: 1.2;
+    }
+
+    .edition-meta {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-bottom: 16px;
+    }
+
+    .latest-info p.desc {
+        color: var(--muted);
+        line-height: 1.65;
+        margin-bottom: 24px;
+    }
+
+    /* ===== EDITIONS GRID ===== */
+    .editions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 24px;
+    }
+
+    .edition-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .edition-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px var(--shadow);
+    }
+
+    .card-cover {
+        height: 200px;
+        background: #e5e0d5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .card-cover img { width: 100%; height: 100%; object-fit: cover; }
+
+    .card-placeholder {
+        text-align: center;
+        color: var(--muted);
+        padding: 16px;
+    }
+
+    .card-placeholder svg { opacity: 0.3; }
+
+    .card-body {
+        padding: 16px;
+        border-top: 1px solid var(--border);
+    }
+
+    .card-body h4 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1rem;
+        margin-bottom: 6px;
+        line-height: 1.3;
+    }
+
+    .card-body .date {
+        font-size: 0.78rem;
+        color: var(--muted);
+    }
+
+    .read-link {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.82rem;
+        color: var(--accent);
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        color: var(--muted);
+    }
+
+    .empty-state h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+        color: var(--ink);
+    }
+
+    @media (max-width: 700px) {
+        .latest-card { grid-template-columns: 1fr; }
+        .latest-cover { min-height: 160px; }
+        .latest-info { padding: 20px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Read Today's Newspaper</h1>
+    <p>Browse the latest editions and archive. All editions are available to read online for free.</p>
+    <form class="search-bar" method="get" action="">
+        <input type="text" name="q" placeholder="Search editions..." value="{{ query }}">
+        <button type="submit">Search</button>
+    </form>
+</section>
+
+<div class="page-body">
+
+    {% if latest and not query %}
+    <div class="section-rule"><h2>Latest Edition</h2></div>
+    <div class="latest-card">
+        <div class="latest-cover">
+            {% if latest.cover_image %}
+                <img src="{{ latest.cover_image.url }}" alt="{{ latest.title }}">
+            {% else %}
+                <div class="cover-placeholder">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                    <br><span>No Cover</span>
+                </div>
+            {% endif %}
+        </div>
+        <div class="latest-info">
+            <span class="badge">Latest Edition</span>
+            <h3>{{ latest.title }}</h3>
+            <p class="edition-meta">{{ latest.edition_date|date:"l, F j, Y" }}</p>
+            {% if latest.description %}
+            <p class="desc">{{ latest.description }}</p>
+            {% endif %}
+            <a href="{% url 'edition_detail' latest.pk %}" class="btn btn-primary">
+                Read Edition &rarr;
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if editions %}
+        {% if query %}
+        <div class="section-rule"><h2>Search Results for "{{ query }}"</h2></div>
+        {% elif editions.count > 1 %}
+        <div class="section-rule"><h2>All Editions</h2></div>
+        {% endif %}
+
+        {% if editions.count > 1 or query %}
+        <div class="editions-grid">
+            {% for edition in editions %}
+            {% if not latest or edition.pk != latest.pk or query %}
+            <a href="{% url 'edition_detail' edition.pk %}" class="edition-card">
+                <div class="card-cover">
+                    {% if edition.cover_image %}
+                        <img src="{{ edition.cover_image.url }}" alt="{{ edition.title }}">
+                    {% else %}
+                        <div class="card-placeholder">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                            </svg>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h4>{{ edition.title }}</h4>
+                    <span class="date">{{ edition.edition_date|date:"F j, Y" }}</span>
+                    <div class="read-link">Read &rarr;</div>
+                </div>
+            </a>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+        {% if query %}
+        <h3>No results for "{{ query }}"</h3>
+        <p>Try a different search term or <a href="{% url 'home' %}">view all editions</a>.</p>
+        {% else %}
+        <h3>No editions published yet</h3>
+        <p>Check back soon — editions will appear here once the admin publishes them.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

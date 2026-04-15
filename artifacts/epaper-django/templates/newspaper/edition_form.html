@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Edition - The Daily ePaper{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-wrapper {
+        max-width: 720px;
+        margin: 48px auto;
+        padding: 0 24px;
+    }
+
+    .form-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px var(--shadow);
+    }
+
+    .form-card-header {
+        background: var(--ink);
+        color: var(--white);
+        padding: 28px 32px;
+    }
+
+    .form-card-header h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+    }
+
+    .form-card-header p { color: #bbb; font-size: 0.85rem; margin-top: 4px; }
+
+    .form-card-body { padding: 32px; }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--muted);
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid var(--border);
+        border-radius: 4px;
+        font-size: 0.95rem;
+        color: var(--ink);
+        background: var(--white);
+        font-family: 'Source Sans 3', sans-serif;
+        transition: border-color 0.2s;
+    }
+
+    .form-control:focus { outline: none; border-color: var(--accent); }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 0;
+    }
+
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent);
+        cursor: pointer;
+    }
+
+    .form-check label {
+        font-size: 0.95rem;
+        color: var(--ink);
+        cursor: pointer;
+        font-weight: normal;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .file-hint {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-top: 6px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+        margin-top: 8px;
+    }
+
+    .errorlist {
+        list-style: none;
+        color: var(--accent);
+        font-size: 0.82rem;
+        margin-top: 6px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+    <div class="form-card">
+        <div class="form-card-header">
+            <h2>{{ action }} Edition</h2>
+            <p>{% if action == 'Upload' %}Add a new newspaper edition to the archive{% else %}Update edition details{% endif %}</p>
+        </div>
+        <div class="form-card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}">Edition Title *</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<ul class="errorlist">{% for e in form.title.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.edition_date.id_for_label }}">Edition Date *</label>
+                    {{ form.edition_date }}
+                    {% if form.edition_date.errors %}<ul class="errorlist">{% for e in form.edition_date.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.pdf_file.id_for_label }}">PDF File *</label>
+                    {{ form.pdf_file }}
+                    <p class="file-hint">Upload the newspaper PDF file. Max size: 50MB.</p>
+                    {% if form.pdf_file.errors %}<ul class="errorlist">{% for e in form.pdf_file.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.cover_image.id_for_label }}">Cover Image (optional)</label>
+                    {{ form.cover_image }}
+                    <p class="file-hint">Upload a front page thumbnail (JPG, PNG). Recommended: 400x560px.</p>
+                    {% if form.cover_image.errors %}<ul class="errorlist">{% for e in form.cover_image.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">Description (optional)</label>
+                    {{ form.description }}
+                </div>
+
+                <div class="form-check">
+                    {{ form.is_published }}
+                    <label for="{{ form.is_published.id_for_label }}">Publish this edition (visible to all readers)</label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">{{ action }} Edition</button>
+                    <a href="{% url 'admin_dashboard' %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

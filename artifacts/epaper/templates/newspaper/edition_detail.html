@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}{{ edition.title }} - The Daily ePaper{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edition-header {
+        background: var(--ink);
+        color: var(--white);
+        padding: 36px 24px;
+    }
+
+    .edition-header-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .breadcrumb {
+        font-size: 0.8rem;
+        color: #aaa;
+        margin-bottom: 16px;
+    }
+
+    .breadcrumb a { color: #ccc; text-decoration: none; }
+    .breadcrumb a:hover { color: var(--white); }
+
+    .edition-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        margin-bottom: 8px;
+    }
+
+    .edition-header .meta {
+        font-size: 0.85rem;
+        color: #bbb;
+    }
+
+    .viewer-wrapper {
+        max-width: 1100px;
+        margin: 32px auto;
+        padding: 0 24px;
+    }
+
+    .viewer-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-bottom: none;
+        padding: 12px 20px;
+        border-radius: 6px 6px 0 0;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .viewer-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--ink);
+    }
+
+    .viewer-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .pdf-embed {
+        width: 100%;
+        height: 80vh;
+        border: 1px solid var(--border);
+        border-radius: 0 0 6px 6px;
+        display: block;
+        background: #525659;
+    }
+
+    .pdf-fallback {
+        border: 1px solid var(--border);
+        border-radius: 0 0 6px 6px;
+        background: var(--white);
+        padding: 48px 24px;
+        text-align: center;
+    }
+
+    .pdf-fallback p { color: var(--muted); margin-bottom: 16px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edition-header">
+    <div class="edition-header-inner">
+        <p class="breadcrumb">
+            <a href="{% url 'home' %}">Home</a> &rsaquo; {{ edition.title }}
+        </p>
+        <h1>{{ edition.title }}</h1>
+        <p class="meta">
+            {{ edition.edition_date|date:"l, F j, Y" }}
+            {% if edition.description %} &bull; {{ edition.description }}{% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="viewer-wrapper">
+    <div class="viewer-toolbar">
+        <span class="viewer-title">{{ edition.title }}</span>
+        <div class="viewer-actions">
+            <a href="{{ edition.pdf_file.url }}" download class="btn btn-outline btn-sm">
+                Download PDF
+            </a>
+            <a href="{{ edition.pdf_file.url }}" target="_blank" class="btn btn-primary btn-sm">
+                Open in New Tab
+            </a>
+        </div>
+    </div>
+
+    <object class="pdf-embed" data="{{ edition.pdf_file.url }}" type="application/pdf">
+        <div class="pdf-fallback">
+            <p>Your browser cannot display this PDF inline. You can:</p>
+            <a href="{{ edition.pdf_file.url }}" download class="btn btn-primary">
+                Download PDF
+            </a>
+            &nbsp;
+            <a href="{{ edition.pdf_file.url }}" target="_blank" class="btn btn-outline">
+                Open in New Tab
+            </a>
+        </div>
+    </object>
+</div>
+{% endblock %}

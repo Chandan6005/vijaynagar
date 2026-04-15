@@ -1,0 +1,21 @@
+kind = "web"
+previewPath = "/"
+title = "ePaper - Digital Newspaper"
+version = "1.0.0"
+id = "artifacts/epaper"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25153
+
+[services.development]
+run = "bash /home/runner/workspace/artifacts/epaper/start.sh"
+
+[services.env]
+PORT = "25153"

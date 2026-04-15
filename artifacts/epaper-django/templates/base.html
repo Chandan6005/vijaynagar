@@ -1,0 +1,250 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}The Daily ePaper{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ink: #1a1a1a;
+            --paper: #f9f5ee;
+            --accent: #8b1a1a;
+            --accent-light: #c0392b;
+            --muted: #6b6460;
+            --border: #d4c9b5;
+            --white: #ffffff;
+            --shadow: rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADER ===== */
+        .site-header {
+            background: var(--white);
+            border-bottom: 3px solid var(--ink);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .header-top {
+            background: var(--ink);
+            color: var(--white);
+            text-align: center;
+            padding: 4px 0;
+            font-size: 0.72rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .header-main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 24px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .site-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--ink);
+            text-decoration: none;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        .site-title span {
+            color: var(--accent);
+        }
+
+        .site-tagline {
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-link {
+            color: var(--ink);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .nav-link.admin-btn {
+            background: var(--accent);
+            color: var(--white);
+            border-color: var(--accent);
+        }
+
+        .nav-link.admin-btn:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-light);
+            color: var(--white);
+        }
+
+        .header-rule {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0 24px;
+        }
+
+        .header-date {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 8px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* ===== MESSAGES ===== */
+        .messages-wrapper {
+            max-width: 1200px;
+            margin: 16px auto 0;
+            padding: 0 24px;
+        }
+
+        .alert {
+            padding: 12px 18px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            border-left: 4px solid;
+        }
+
+        .alert-success { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
+        .alert-error   { background: #fbe9e7; border-color: var(--accent); color: var(--accent); }
+        .alert-warning { background: #fff8e1; border-color: #ffc107; color: #f57f17; }
+        .alert-info    { background: #e3f2fd; border-color: #2196f3; color: #1565c0; }
+
+        /* ===== MAIN ===== */
+        main { flex: 1; }
+
+        /* ===== FOOTER ===== */
+        footer {
+            background: var(--ink);
+            color: var(--white);
+            text-align: center;
+            padding: 24px;
+            margin-top: auto;
+        }
+
+        footer p { font-size: 0.82rem; color: #aaa; }
+        footer a { color: #ccc; text-decoration: none; }
+
+        /* ===== UTILITIES ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-primary { background: var(--accent); color: var(--white); border-color: var(--accent); }
+        .btn-primary:hover { background: var(--accent-light); border-color: var(--accent-light); }
+
+        .btn-outline { background: transparent; color: var(--ink); border-color: var(--border); }
+        .btn-outline:hover { border-color: var(--ink); }
+
+        .btn-danger { background: #c0392b; color: var(--white); border-color: #c0392b; }
+        .btn-danger:hover { background: #e74c3c; }
+
+        .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+
+        @media (max-width: 600px) {
+            .site-title { font-size: 1.8rem; }
+            .header-main { flex-direction: column; align-items: flex-start; }
+            .header-date { flex-direction: column; gap: 4px; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-top">
+        Established 2024 &bull; Your Trusted Digital Newspaper
+    </div>
+    <div class="header-main">
+        <div>
+            <a href="{% url 'home' %}" class="site-title">The Daily <span>ePaper</span></a>
+            <p class="site-tagline">All the news that's fit to read online</p>
+        </div>
+        <nav class="header-nav">
+            <a href="{% url 'home' %}" class="nav-link">Home</a>
+            {% if user.is_authenticated and user.is_staff %}
+                <a href="{% url 'admin_dashboard' %}" class="nav-link">Dashboard</a>
+                <a href="{% url 'admin_logout' %}" class="nav-link">Logout</a>
+            {% else %}
+                <a href="{% url 'admin_login' %}" class="nav-link admin-btn">Admin Login</a>
+            {% endif %}
+        </nav>
+    </div>
+    <hr class="header-rule">
+    <div class="header-date">
+        <span>{% now "l, F j, Y" %}</span>
+        <span>Digital Edition</span>
+    </div>
+</header>
+
+{% if messages %}
+<div class="messages-wrapper">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer>
+    <p>&copy; {% now "Y" %} The Daily ePaper &mdash; <a href="{% url 'home' %}">Home</a> &bull; <a href="{% url 'admin_login' %}">Admin</a></p>
+</footer>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard - The Daily ePaper{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-hero {
+        background: var(--ink);
+        color: var(--white);
+        padding: 36px 24px;
+    }
+
+    .dashboard-hero-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .dashboard-hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+    }
+
+    .dashboard-hero p { color: #bbb; font-size: 0.9rem; margin-top: 4px; }
+
+    .dashboard-body {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 24px;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--accent);
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.78rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 6px;
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.3rem;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .editions-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        overflow: hidden;
+        font-size: 0.9rem;
+    }
+
+    .editions-table th {
+        background: var(--ink);
+        color: var(--white);
+        padding: 14px 16px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .editions-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+    }
+
+    .editions-table tr:last-child td { border-bottom: none; }
+
+    .editions-table tr:hover td { background: #faf8f5; }
+
+    .status-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-published { background: #e8f5e9; color: #2e7d32; }
+    .status-draft { background: #fff8e1; color: #f57f17; }
+
+    .action-buttons { display: flex; gap: 8px; }
+
+    .empty-table {
+        text-align: center;
+        padding: 60px 24px;
+        color: var(--muted);
+    }
+
+    .empty-table h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.3rem;
+        color: var(--ink);
+        margin-bottom: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-hero">
+    <div class="dashboard-hero-inner">
+        <div>
+            <h1>Admin Dashboard</h1>
+            <p>Manage all newspaper editions &mdash; Welcome, {{ user.username }}</p>
+        </div>
+        <a href="{% url 'edition_upload' %}" class="btn btn-primary">
+            + Upload New Edition
+        </a>
+    </div>
+</div>
+
+<div class="dashboard-body">
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-number">{{ editions.count }}</div>
+            <div class="stat-label">Total Editions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ editions|length }}</div>
+            <div class="stat-label">Uploaded</div>
+        </div>
+        <div class="stat-card">
+            {% with pub=editions|length %}
+            <div class="stat-number">{{ editions|dictsort:"is_published"|last|default:"0" }}</div>
+            {% endwith %}
+            <div class="stat-number" style="font-size:1.8rem;">
+                {% for e in editions %}{% if e.is_published %}&#10003;{% endif %}{% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- simpler stats -->
+    <div class="stats-row" style="margin-top:-24px; margin-bottom:32px;">
+        <div class="stat-card">
+            <div class="stat-number">{{ editions.count }}</div>
+            <div class="stat-label">Total Editions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">
+                {% with count=0 %}
+                {% for e in editions %}{% if e.is_published %}{% with count=count|add:1 %}{% endwith %}{% endif %}{% endfor %}
+                {{ editions|length }}
+                {% endwith %}
+            </div>
+            <div class="stat-label">Published</div>
+        </div>
+    </div>
+
+    <h2 class="section-title">All Editions</h2>
+
+    {% if editions %}
+    <table class="editions-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Edition Date</th>
+                <th>Status</th>
+                <th>Uploaded</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for edition in editions %}
+            <tr>
+                <td><strong>{{ edition.title }}</strong></td>
+                <td>{{ edition.edition_date|date:"M j, Y" }}</td>
+                <td>
+                    {% if edition.is_published %}
+                    <span class="status-badge status-published">Published</span>
+                    {% else %}
+                    <span class="status-badge status-draft">Draft</span>
+                    {% endif %}
+                </td>
+                <td>{{ edition.created_at|date:"M j, Y" }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'edition_detail' edition.pk %}" class="btn btn-outline btn-sm" target="_blank">View</a>
+                        <a href="{% url 'edition_edit' edition.pk %}" class="btn btn-outline btn-sm">Edit</a>
+                        <a href="{% url 'edition_delete' edition.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-table">
+        <h3>No editions yet</h3>
+        <p>Upload your first newspaper edition to get started.</p>
+        <a href="{% url 'edition_upload' %}" class="btn btn-primary" style="margin-top:16px;">Upload First Edition</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
