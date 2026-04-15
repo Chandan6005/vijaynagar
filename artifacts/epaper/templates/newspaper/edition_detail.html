@@ -112,3 +112,24 @@
     </iframe>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simple mobile detection
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+        // Hide the iframe and show a mobile-friendly message
+        document.querySelector('.pdf-embed').style.display = 'none';
+        const toolbar = document.querySelector('.viewer-toolbar');
+        const mobileMsg = document.createElement('div');
+        mobileMsg.innerHTML = `
+            <p style="text-align: center; padding: 20px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px;">
+                PDF viewing is not supported on mobile browsers. 
+                <a href="{{ edition.pdf_file.url }}" download style="color: #007bff; text-decoration: underline;">Download the PDF</a> to view it.
+            </p>
+        `;
+        toolbar.insertAdjacentElement('afterend', mobileMsg);
+    }
+</script>
+{% endblock %}
