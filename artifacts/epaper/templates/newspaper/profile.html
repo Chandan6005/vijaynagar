@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Profile - Vijayanagar Record{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-page {
+        max-width: 760px;
+        margin: 60px auto;
+        padding: 0 24px;
+    }
+
+    .profile-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 16px 40px rgba(0,0,0,0.08);
+    }
+
+    .profile-card h1 {
+        font-family: 'Playfair Display', serif;
+        margin-bottom: 16px;
+        color: var(--ink);
+    }
+
+    .profile-row {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        gap: 16px;
+        margin-bottom: 18px;
+        align-items: center;
+    }
+
+    .profile-row strong {
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+    }
+
+    .profile-value {
+        color: var(--ink);
+        font-size: 0.95rem;
+    }
+
+    .profile-note {
+        margin-top: 24px;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.7;
+    }
+
+    .profile-actions {
+        margin-top: 24px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-card">
+        <h1>Your Profile</h1>
+        <div class="profile-row">
+            <strong>Username</strong>
+            <div class="profile-value">{{ user.username }}</div>
+        </div>
+        <div class="profile-row">
+            <strong>Email</strong>
+            <div class="profile-value">{{ user.email|default:'Not provided' }}</div>
+        </div>
+        <div class="profile-row">
+            <strong>Member since</strong>
+            <div class="profile-value">{{ user.date_joined|date:"F j, Y" }}</div>
+        </div>
+        <div class="profile-actions">
+            <a href="{% url 'home' %}" class="btn btn-outline">Back to Home</a>
+        </div>
+        <p class="profile-note">This account is managed by Django Authentication. After registering, you can return to the homepage and continue browsing editions with a persistent user session.</p>
+    </div>
+</div>
+{% endblock %}

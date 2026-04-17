@@ -1,14 +1,23 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Vijayanagar Record{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         :root {
             --ink: #1a1a1a;
@@ -18,7 +27,18 @@
             --muted: #6b6460;
             --border: #d4c9b5;
             --white: #ffffff;
-            --shadow: rgba(0,0,0,0.12);
+            --shadow: rgba(0, 0, 0, 0.12);
+        }
+
+        [data-theme='dark'] {
+            --ink: #f4f4f5;
+            --paper: #111316;
+            --accent: #f59e0b;
+            --accent-light: #fbbf24;
+            --muted: #9ca3af;
+            --border: #27272a;
+            --white: #111316;
+            --shadow: rgba(0, 0, 0, 0.4);
         }
 
         body {
@@ -148,13 +168,34 @@
             border-left: 4px solid;
         }
 
-        .alert-success { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
-        .alert-error   { background: #fbe9e7; border-color: var(--accent); color: var(--accent); }
-        .alert-warning { background: #fff8e1; border-color: #ffc107; color: #f57f17; }
-        .alert-info    { background: #e3f2fd; border-color: #2196f3; color: #1565c0; }
+        .alert-success {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+
+        .alert-error {
+            background: #fbe9e7;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .alert-warning {
+            background: #fff8e1;
+            border-color: #ffc107;
+            color: #f57f17;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            color: #1565c0;
+        }
 
         /* ===== MAIN ===== */
-        main { flex: 1; }
+        main {
+            flex: 1;
+        }
 
         /* ===== FOOTER ===== */
         footer {
@@ -165,8 +206,15 @@
             margin-top: auto;
         }
 
-        footer p { font-size: 0.82rem; color: #aaa; }
-        footer a { color: #ccc; text-decoration: none; }
+        footer p {
+            font-size: 0.82rem;
+            color: #aaa;
+        }
+
+        footer a {
+            color: #ccc;
+            text-decoration: none;
+        }
 
         /* ===== UTILITIES ===== */
         .btn {
@@ -184,68 +232,133 @@
             letter-spacing: 0.3px;
         }
 
-        .btn-primary { background: var(--accent); color: var(--white); border-color: var(--accent); }
-        .btn-primary:hover { background: var(--accent-light); border-color: var(--accent-light); }
+        .btn-primary {
+            background: var(--accent);
+            color: var(--white);
+            border-color: var(--accent);
+        }
 
-        .btn-outline { background: transparent; color: var(--ink); border-color: var(--border); }
-        .btn-outline:hover { border-color: var(--ink); }
+        .btn-primary:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-light);
+        }
 
-        .btn-danger { background: #c0392b; color: var(--white); border-color: #c0392b; }
-        .btn-danger:hover { background: #e74c3c; }
+        .btn-outline {
+            background: transparent;
+            color: var(--ink);
+            border-color: var(--border);
+        }
 
-        .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+        .btn-outline:hover {
+            border-color: var(--ink);
+        }
+
+        .btn-danger {
+            background: #c0392b;
+            color: var(--white);
+            border-color: #c0392b;
+        }
+
+        .btn-danger:hover {
+            background: #e74c3c;
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+        }
 
         @media (max-width: 600px) {
-            .site-title { font-size: 1.8rem; }
-            .header-main { flex-direction: column; align-items: flex-start; }
-            .header-date { flex-direction: column; gap: 4px; }
+            .site-title {
+                font-size: 1.8rem;
+            }
+
+            .header-main {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-date {
+                flex-direction: column;
+                gap: 4px;
+            }
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
 
-<header class="site-header">
-    <div class="header-top">
-        Monthly Kannada Newspaper &bull; Editor: E.Rajesh
-    </div>
-    <div class="header-main">
-        <div>
-            <a href="{% url 'home' %}" class="site-title">ವಿಜಯನಗರ <span>ರೆಕಾರ್ಡ್</span></a>
-            <p class="site-tagline">ಕನ್ನಡ ಮಾಸಿಕ ಪತ್ರಿಕೆ</p>
+    <header class="site-header">
+        <div class="header-top">
+            Monthly Kannada Newspaper &bull; Editor: E.Rajesh
         </div>
-        <nav class="header-nav">
-            <a href="{% url 'home' %}" class="nav-link">Home</a>
-            {% if user.is_authenticated and user.is_staff %}
-                <a href="{% url 'admin_dashboard' %}" class="nav-link">Dashboard</a>
-                <a href="{% url 'admin_logout' %}" class="nav-link">Logout</a>
-            {% else %}
-                <a href="{% url 'admin_login' %}" class="nav-link admin-btn">Admin Login</a>
-            {% endif %}
-        </nav>
+        <div class="header-main">
+            <div>
+                <a href="{% url 'home' %}" class="site-title">ವಿಜಯನಗರ <span>ರೆಕಾರ್ಡ್</span></a>
+                <p class="site-tagline">ಕನ್ನಡ ಮಾಸಿಕ ಪತ್ರಿಕೆ</p>
+            </div>
+            <nav class="header-nav">
+                <a href="{% url 'home' %}" class="nav-link">Home</a>
+                <button id="theme-toggle" class="nav-link btn-outline" type="button">Dark</button>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="nav-link">Profile</a>
+                    <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link">Login</a>
+                    <a href="{% url 'signup' %}" class="nav-link admin-btn">Register</a>
+                {% endif %}
+                {% if user.is_authenticated and user.is_staff %}
+                    <a href="{% url 'admin_dashboard' %}" class="nav-link">Dashboard</a>
+                {% else %}
+                    <a href="{% url 'admin_login' %}" class="nav-link admin-btn">Admin Login</a>
+                {% endif %}
+            </nav>
+        </div>
+        <hr class="header-rule">
+        <div class="header-date">
+            <span>{% now "l, F j, Y" %}</span>
+            <span>Editor: E.Rajesh &bull; Digital Edition</span>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="messages-wrapper">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
     </div>
-    <hr class="header-rule">
-    <div class="header-date">
-        <span>{% now "l, F j, Y" %}</span>
-        <span>Editor: E.Rajesh &bull; Digital Edition</span>
-    </div>
-</header>
+    {% endif %}
 
-{% if messages %}
-<div class="messages-wrapper">
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
+    <main>{% block content %}{% endblock %}</main>
 
-<main>{% block content %}{% endblock %}</main>
+    <footer>
+        <p><strong style="color:#fff;">Vijayanagar Record</strong> &mdash; Monthly Kannada Newspaper</p>
+        <p style="margin-top:6px;">Editor: E.Rajesh &bull; &copy; {% now "Y" %} &bull; <a
+                href="{% url 'home' %}">Home</a> &bull; <a href="{% url 'admin_login' %}">Admin</a></p>
+    </footer>
 
-<footer>
-    <p><strong style="color:#fff;">Vijayanagar Record</strong> &mdash; Monthly Kannada Newspaper</p>
-    <p style="margin-top:6px;">Editor: E.Rajesh &bull; &copy; {% now "Y" %} &bull; <a href="{% url 'home' %}">Home</a> &bull; <a href="{% url 'admin_login' %}">Admin</a></p>
-</footer>
+    {% block extra_js %}{% endblock %}
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const root = document.documentElement;
+        const storedTheme = localStorage.getItem('news_theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const defaultTheme = storedTheme || (prefersDark ? 'dark' : 'light');
 
-{% block extra_js %}{% endblock %}
+        const applyTheme = (theme) => {
+            root.dataset.theme = theme;
+            themeToggle.textContent = theme === 'dark' ? 'Light' : 'Dark';
+        };
+
+        applyTheme(defaultTheme);
+
+        themeToggle?.addEventListener('click', () => {
+            const nextTheme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+            applyTheme(nextTheme);
+            localStorage.setItem('news_theme', nextTheme);
+        });
+    </script>
 </body>
+
 </html>

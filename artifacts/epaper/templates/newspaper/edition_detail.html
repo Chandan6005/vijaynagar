@@ -20,8 +20,14 @@
         margin-bottom: 16px;
     }
 
-    .breadcrumb a { color: #ccc; text-decoration: none; }
-    .breadcrumb a:hover { color: var(--white); }
+    .breadcrumb a {
+        color: #ccc;
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        color: var(--white);
+    }
 
     .edition-header h1 {
         font-family: 'Playfair Display', serif;
@@ -63,6 +69,36 @@
         display: flex;
         gap: 10px;
         align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .share-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .share-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        text-decoration: none;
+        color: var(--white);
+        background: var(--accent);
+        transition: background 0.2s, transform 0.2s;
+    }
+
+    .share-button:hover {
+        background: var(--accent-light);
+        transform: translateY(-1px);
+    }
+
+    .share-button.secondary {
+        background: #444;
     }
 
     .pdf-embed {
@@ -87,6 +123,7 @@
         <p class="meta">
             {{ edition.edition_date|date:"l, F j, Y" }}
             {% if edition.description %} &bull; {{ edition.description }}{% endif %}
+            &bull; Views: <strong>{{ edition.view_count }}</strong>
         </p>
     </div>
 </div>
@@ -102,13 +139,23 @@
                 Open in New Tab
             </a>
         </div>
+        <div class="share-row">
+            <a href="https://twitter.com/intent/tweet?text={{ edition.title|urlencode }}&url={{ share_url|urlencode }}"
+                target="_blank" class="share-button">
+                Share on Twitter
+            </a>
+            <a href="https://wa.me/?text={{ edition.title|urlencode }}%20{{ share_url|urlencode }}" target="_blank"
+                class="share-button secondary">
+                Share on WhatsApp
+            </a>
+            <a href="https://t.me/share/url?url={{ share_url|urlencode }}&text={{ edition.title|urlencode }}"
+                target="_blank" class="share-button secondary">
+                Share on Telegram
+            </a>
+        </div>
     </div>
 
-    <iframe
-        class="pdf-embed"
-        src="{{ edition.pdf_file.url }}"
-        title="{{ edition.title }}"
-        allowfullscreen>
+    <iframe class="pdf-embed" src="{{ edition.pdf_file.url }}" title="{{ edition.title }}" allowfullscreen>
     </iframe>
 </div>
 {% endblock %}

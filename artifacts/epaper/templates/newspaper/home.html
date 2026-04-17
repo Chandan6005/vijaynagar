@@ -25,24 +25,87 @@
     }
 
     .search-bar {
-        max-width: 480px;
-        margin: 0 auto;
+        max-width: 680px;
+        margin: 0 auto 16px;
         display: flex;
-        gap: 0;
+        flex-wrap: wrap;
+        gap: 12px;
     }
 
-    .search-bar input {
-        flex: 1;
+    .search-bar input,
+    .search-bar select {
+        flex: 1 1 200px;
+        min-width: 0;
         padding: 12px 18px;
         border: 2px solid var(--border);
-        border-right: none;
-        border-radius: 4px 0 0 4px;
+        border-radius: 6px;
         font-size: 0.95rem;
         background: var(--white);
         color: var(--ink);
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .search-bar input:focus { outline: none; border-color: var(--accent); }
+    .search-bar input:focus,
+    .search-bar select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(139, 26, 26, 0.08);
+    }
+
+    .search-bar button {
+        padding: 12px 20px;
+        background: var(--accent);
+        color: var(--white);
+        border: 2px solid var(--accent);
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: background 0.2s, transform 0.2s;
+    }
+
+    .search-bar button:hover {
+        background: var(--accent-light);
+        transform: translateY(-1px);
+    }
+
+    .filters-meta {
+        max-width: 680px;
+        margin: 0 auto 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        font-size: 0.9rem;
+        color: var(--muted);
+    }
+
+    .filters-meta strong {
+        color: var(--ink);
+    }
+
+    .edition-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        will-change: transform;
+    }
+
+    .edition-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 30px rgba(0, 0, 0, 0.12);
+        border-color: rgba(139, 26, 26, 0.2);
+    }
+
+    .search-bar input:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
 
     .search-bar button {
         padding: 12px 20px;
@@ -56,7 +119,9 @@
         transition: background 0.2s;
     }
 
-    .search-bar button:hover { background: var(--accent-light); }
+    .search-bar button:hover {
+        background: var(--accent-light);
+    }
 
     .page-body {
         max-width: 1200px;
@@ -118,8 +183,14 @@
         color: var(--muted);
     }
 
-    .cover-placeholder svg { opacity: 0.35; margin-bottom: 8px; }
-    .cover-placeholder span { font-size: 0.8rem; }
+    .cover-placeholder svg {
+        opacity: 0.35;
+        margin-bottom: 8px;
+    }
+
+    .cover-placeholder span {
+        font-size: 0.8rem;
+    }
 
     .latest-info {
         padding: 32px 32px 32px 0;
@@ -192,7 +263,11 @@
         overflow: hidden;
     }
 
-    .card-cover img { width: 100%; height: 100%; object-fit: cover; }
+    .card-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
     .card-placeholder {
         text-align: center;
@@ -200,7 +275,9 @@
         padding: 16px;
     }
 
-    .card-placeholder svg { opacity: 0.3; }
+    .card-placeholder svg {
+        opacity: 0.3;
+    }
 
     .card-body {
         padding: 16px;
@@ -243,9 +320,17 @@
     }
 
     @media (max-width: 700px) {
-        .latest-card { grid-template-columns: 1fr; }
-        .latest-cover { min-height: 160px; }
-        .latest-info { padding: 20px; }
+        .latest-card {
+            grid-template-columns: 1fr;
+        }
+
+        .latest-cover {
+            min-height: 160px;
+        }
+
+        .latest-info {
+            padding: 20px;
+        }
     }
 </style>
 {% endblock %}
@@ -256,25 +341,41 @@
     <p>Browse the latest editions and archive. All editions are available to read online for free.</p>
     <form class="search-bar" method="get" action="">
         <input type="text" name="q" placeholder="Search editions..." value="{{ query }}">
-        <button type="submit">Search</button>
+        <input type="date" name="from_date" value="{{ from_date }}" aria-label="From date">
+        <input type="date" name="to_date" value="{{ to_date }}" aria-label="To date">
+        <select name="sort" aria-label="Sort editions">
+            <option value="newest" {% if sort=='newest' %}selected{% endif %}>Newest first</option>
+            <option value="oldest" {% if sort=='oldest' %}selected{% endif %}>Oldest first</option>
+        </select>
+        <button type="submit">Filter</button>
     </form>
+    {% if query or from_date or to_date %}
+    <div class="filters-meta">
+        <span><strong>{{ editions.count }}</strong> matching editions</span>
+        <span>Showing results from <strong>{{ from_date|default:'beginning' }}</strong> to <strong>{{
+                to_date|default:'today' }}</strong></span>
+    </div>
+    {% endif %}
 </section>
 
 <div class="page-body">
 
     {% if latest and not query %}
-    <div class="section-rule"><h2>Latest Edition</h2></div>
+    <div class="section-rule">
+        <h2>Latest Edition</h2>
+    </div>
     <div class="latest-card">
         <div class="latest-cover">
             {% if latest.cover_image %}
-                <img src="{{ latest.cover_image.url }}" alt="{{ latest.title }}">
+            <img src="{{ latest.cover_image.url }}" alt="{{ latest.title }}">
             {% else %}
-                <div class="cover-placeholder">
-                    <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                    </svg>
-                    <br><span>No Cover</span>
-                </div>
+            <div class="cover-placeholder">
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M19 3H5c-1.1 0-2 .9-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                </svg>
+                <br><span>No Cover</span>
+            </div>
             {% endif %}
         </div>
         <div class="latest-info">
@@ -292,38 +393,43 @@
     {% endif %}
 
     {% if editions %}
-        {% if query %}
-        <div class="section-rule"><h2>Search Results for "{{ query }}"</h2></div>
-        {% elif editions.count > 1 %}
-        <div class="section-rule"><h2>All Editions</h2></div>
-        {% endif %}
+    {% if query %}
+    <div class="section-rule">
+        <h2>Search Results for "{{ query }}"</h2>
+    </div>
+    {% elif editions.count > 1 %}
+    <div class="section-rule">
+        <h2>All Editions</h2>
+    </div>
+    {% endif %}
 
-        {% if editions.count > 1 or query %}
-        <div class="editions-grid">
-            {% for edition in editions %}
-            {% if not latest or edition.pk != latest.pk or query %}
-            <a href="{% url 'edition_detail' edition.pk %}" class="edition-card">
-                <div class="card-cover">
-                    {% if edition.cover_image %}
-                        <img src="{{ edition.cover_image.url }}" alt="{{ edition.title }}">
-                    {% else %}
-                        <div class="card-placeholder">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                            </svg>
-                        </div>
-                    {% endif %}
+    {% if editions.count > 1 or query %}
+    <div class="editions-grid">
+        {% for edition in editions %}
+        {% if not latest or edition.pk != latest.pk or query %}
+        <a href="{% url 'edition_detail' edition.pk %}" class="edition-card">
+            <div class="card-cover">
+                {% if edition.cover_image %}
+                <img src="{{ edition.cover_image.url }}" alt="{{ edition.title }}">
+                {% else %}
+                <div class="card-placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                    </svg>
                 </div>
-                <div class="card-body">
-                    <h4>{{ edition.title }}</h4>
-                    <span class="date">{{ edition.edition_date|date:"F j, Y" }}</span>
-                    <div class="read-link">Read &rarr;</div>
-                </div>
-            </a>
-            {% endif %}
-            {% endfor %}
-        </div>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <h4>{{ edition.title }}</h4>
+                <span class="date">{{ edition.edition_date|date:"F j, Y" }}</span>
+                <div class="read-link">Read &rarr;</div>
+            </div>
+        </a>
         {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
 
     {% else %}
     <div class="empty-state">

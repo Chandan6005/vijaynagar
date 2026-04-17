@@ -24,7 +24,11 @@
         font-size: 1.8rem;
     }
 
-    .dashboard-hero p { color: #bbb; font-size: 0.9rem; margin-top: 4px; }
+    .dashboard-hero p {
+        color: #bbb;
+        font-size: 0.9rem;
+        margin-top: 4px;
+    }
 
     .dashboard-body {
         max-width: 1100px;
@@ -98,9 +102,13 @@
         vertical-align: middle;
     }
 
-    .editions-table tr:last-child td { border-bottom: none; }
+    .editions-table tr:last-child td {
+        border-bottom: none;
+    }
 
-    .editions-table tr:hover td { background: #faf8f5; }
+    .editions-table tr:hover td {
+        background: #faf8f5;
+    }
 
     .status-badge {
         display: inline-block;
@@ -110,10 +118,20 @@
         font-weight: 600;
     }
 
-    .status-published { background: #e8f5e9; color: #2e7d32; }
-    .status-draft { background: #fff8e1; color: #f57f17; }
+    .status-published {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
 
-    .action-buttons { display: flex; gap: 8px; }
+    .status-draft {
+        background: #fff8e1;
+        color: #f57f17;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
 
     .empty-table {
         text-align: center;
@@ -151,33 +169,16 @@
             <div class="stat-label">Total Editions</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">{{ editions|length }}</div>
-            <div class="stat-label">Uploaded</div>
-        </div>
-        <div class="stat-card">
-            {% with pub=editions|length %}
-            <div class="stat-number">{{ editions|dictsort:"is_published"|last|default:"0" }}</div>
-            {% endwith %}
-            <div class="stat-number" style="font-size:1.8rem;">
-                {% for e in editions %}{% if e.is_published %}&#10003;{% endif %}{% endfor %}
-            </div>
-        </div>
-    </div>
-
-    <!-- simpler stats -->
-    <div class="stats-row" style="margin-top:-24px; margin-bottom:32px;">
-        <div class="stat-card">
-            <div class="stat-number">{{ editions.count }}</div>
-            <div class="stat-label">Total Editions</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-number">
-                {% with count=0 %}
-                {% for e in editions %}{% if e.is_published %}{% with count=count|add:1 %}{% endwith %}{% endif %}{% endfor %}
-                {{ editions|length }}
-                {% endwith %}
-            </div>
+            <div class="stat-number">{{ published_count }}</div>
             <div class="stat-label">Published</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ draft_count }}</div>
+            <div class="stat-label">Drafts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_views }}</div>
+            <div class="stat-label">Total Views</div>
         </div>
     </div>
 
@@ -190,6 +191,7 @@
                 <th>Title</th>
                 <th>Edition Date</th>
                 <th>Status</th>
+                <th>Views</th>
                 <th>Uploaded</th>
                 <th>Actions</th>
             </tr>
@@ -206,10 +208,12 @@
                     <span class="status-badge status-draft">Draft</span>
                     {% endif %}
                 </td>
+                <td>{{ edition.view_count }}</td>
                 <td>{{ edition.created_at|date:"M j, Y" }}</td>
                 <td>
                     <div class="action-buttons">
-                        <a href="{% url 'edition_detail' edition.pk %}" class="btn btn-outline btn-sm" target="_blank">View</a>
+                        <a href="{% url 'edition_detail' edition.pk %}" class="btn btn-outline btn-sm"
+                            target="_blank">View</a>
                         <a href="{% url 'edition_edit' edition.pk %}" class="btn btn-outline btn-sm">Edit</a>
                         <a href="{% url 'edition_delete' edition.pk %}" class="btn btn-danger btn-sm">Delete</a>
                     </div>
