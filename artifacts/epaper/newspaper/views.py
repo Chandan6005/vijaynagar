@@ -203,3 +203,9 @@ def edition_delete(request, pk):
 def admin_logout(request):
     logout(request)
     return redirect('home')
+
+
+@login_required
+def site_logout(request):
+    logout(request)
+    return redirect('home')
