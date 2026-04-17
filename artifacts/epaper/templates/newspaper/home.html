@@ -344,8 +344,8 @@
         <input type="date" name="from_date" value="{{ from_date }}" aria-label="From date">
         <input type="date" name="to_date" value="{{ to_date }}" aria-label="To date">
         <select name="sort" aria-label="Sort editions">
-            <option value="newest" {% if sort=='newest' %}selected{% endif %}>Newest first</option>
-            <option value="oldest" {% if sort=='oldest' %}selected{% endif %}>Oldest first</option>
+            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest first</option>
+            <option value="oldest" {% if sort == 'oldest' %}selected{% endif %}>Oldest first</option>
         </select>
         <button type="submit">Filter</button>
     </form>
