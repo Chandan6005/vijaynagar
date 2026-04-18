@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from datetime import datetime
 import cloudinary.uploader
+from mongoengine import Q as MongoQ
 from .models import Edition
 from .forms import EditionForm, AdminLoginForm, SignUpForm
 
@@ -27,24 +28,22 @@ def home(request):
     to_date = request.GET.get('to_date', '').strip()
     sort = request.GET.get('sort', 'newest')
 
+    # Apply search filter
     if query:
-        editions = Edition.objects(is_published=True, title__icontains=query) | Edition.objects(is_published=True, description__icontains=query)
+        editions = editions(MongoQ(title__icontains=query) | MongoQ(description__icontains=query))
 
+    # Apply date range filters
     if from_date:
         try:
             from_date_obj = datetime.strptime(from_date, '%Y-%m-%d').date()
-            editions = Edition.objects(is_published=True, edition_date__gte=from_date_obj)
+            editions = editions(edition_date__gte=from_date_obj)
         except:
             pass
 
     if to_date:
         try:
             to_date_obj = datetime.strptime(to_date, '%Y-%m-%d').date()
-            if from_date:
-                from_date_obj = datetime.strptime(from_date, '%Y-%m-%d').date()
-                editions = Edition.objects(is_published=True, edition_date__gte=from_date_obj, edition_date__lte=to_date_obj)
-            else:
-                editions = Edition.objects(is_published=True, edition_date__lte=to_date_obj)
+            editions = editions(edition_date__lte=to_date_obj)
         except:
             pass
 
