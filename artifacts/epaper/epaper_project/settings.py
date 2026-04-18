@@ -1,5 +1,12 @@
 import os
 from pathlib import Path
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+from mongoengine import connect, disconnect
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,6 +29,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'newspaper',
 ]
 
@@ -58,12 +67,37 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'epaper_project.wsgi.application'
 
+# MongoDB Atlas Configuration
+MONGODB_URI = os.environ.get(
+    'MONGODB_URI',
+    'mongodb+srv://epaper_user:epaper_pass@cluster0.mongodb.net/epaper?retryWrites=true&w=majority'
+)
+
+try:
+    disconnect()
+    connect(host=MONGODB_URI)
+except Exception as e:
+    print(f"MongoDB connection warning: {e}")
+
+# Keep DATABASES for Django auth compatibility (uses SQLite locally for sessions)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Cloudinary Configuration
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
+)
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+MEDIA_URL = '/media/'
+CLOUDINARY_STORAGE = {'FOLDER': 'epaper'}
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -81,9 +115,6 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

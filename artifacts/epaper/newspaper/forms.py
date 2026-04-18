@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Edition
 
 
 class AdminLoginForm(forms.Form):
@@ -13,16 +12,34 @@ class AdminLoginForm(forms.Form):
     )
 
 
-class EditionForm(forms.ModelForm):
-    class Meta:
-        model = Edition
-        fields = ['title', 'edition_date', 'pdf_file', 'cover_image', 'description', 'is_published']
-        widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. The Daily Tribune - Morning Edition'}),
-            'edition_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Brief description of this edition...'}),
-            'is_published': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
+class EditionForm(forms.Form):
+    """Form for uploading editions with Cloudinary file handling"""
+    title = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. The Daily Tribune - Morning Edition'})
+    )
+    edition_date = forms.DateField(
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    pdf_file = forms.FileField(
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': 'application/pdf'}),
+        help_text='Upload a PDF (max 100 MB)'
+    )
+    cover_image = forms.FileField(
+        required=False,
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+        help_text='Upload a cover image (optional)'
+    )
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Brief description of this edition...'}),
+    )
+    is_published = forms.BooleanField(
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        label='Publish immediately'
+    )
 
 
 class SignUpForm(UserCreationForm):

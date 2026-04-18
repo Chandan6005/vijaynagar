@@ -4,8 +4,12 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.11"
 dependencies = [
+    "python-dotenv"
     "django>=5.2.13",
     "gunicorn>=25.3.0",
     "pillow>=12.2.0",
     "whitenoise>=6.12.0",
+    "mongoengine>=0.27.0",
+    "cloudinary>=1.36.0",
+    "django-cloudinary-storage>=0.3.0",
 ]
