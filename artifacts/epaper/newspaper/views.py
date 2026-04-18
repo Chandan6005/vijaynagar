@@ -54,7 +54,7 @@ def home(request):
     #     editions = editions.order_by('-edition_date', '-created_at')
 
     # editions = list(editions)
-    # latest = editions[0] if editions else None
+    latest = editions[0] if editions else None
 
     return render(request, 'newspaper/home.html', {
         'editions': editions,
