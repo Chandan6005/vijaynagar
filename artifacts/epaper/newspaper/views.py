@@ -30,20 +30,20 @@ def home(request):
 
     # Apply search filter
     if query:
-        editions = editions(MongoQ(title__icontains=query) | MongoQ(description__icontains=query))
+        editions = editions.filter(MongoQ(title__icontains=query) | MongoQ(description__icontains=query))
 
     # Apply date range filters
     if from_date:
         try:
             from_date_obj = datetime.strptime(from_date, '%Y-%m-%d').date()
-            editions = editions(edition_date__gte=from_date_obj)
+            editions = editions.filter(edition_date__gte=from_date_obj)
         except:
             pass
 
     if to_date:
         try:
             to_date_obj = datetime.strptime(to_date, '%Y-%m-%d').date()
-            editions = editions(edition_date__lte=to_date_obj)
+            editions = editions.filter(edition_date__lte=to_date_obj)
         except:
             pass
 
