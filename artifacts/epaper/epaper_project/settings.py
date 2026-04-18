@@ -1,12 +1,31 @@
 import os
 from pathlib import Path
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-from mongoengine import connect, disconnect
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Cloudinary config (lazy-loaded to avoid import errors during build)
+try:
+    import cloudinary
+    import cloudinary.uploader
+    import cloudinary.api
+    cloudinary.config(
+        cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+        api_key=os.environ.get('CLOUDINARY_API_KEY'),
+        api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
+    )
+except ImportError:
+    pass
+
+# MongoDB setup (lazy-loaded)
+try:
+    from mongoengine import connect, disconnect
+    MONGODB_URI = os.environ.get('MONGODB_URI')
+    if MONGODB_URI:
+        connect(host=MONGODB_URI, connect=False)
+except ImportError:
+    pass
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -74,6 +93,7 @@ MONGODB_URI = os.environ.get(
 )
 
 try:
+    from mongoengine import connect, disconnect
     disconnect()
     connect(host=MONGODB_URI)
 except Exception as e:
@@ -88,15 +108,13 @@ DATABASES = {
 }
 
 # Cloudinary Configuration
-cloudinary.config(
-    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.environ.get('CLOUDINARY_API_KEY'),
-    api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
-)
+try:
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    CLOUDINARY_STORAGE = {'FOLDER': 'epaper'}
+except Exception:
+    pass
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
-CLOUDINARY_STORAGE = {'FOLDER': 'epaper'}
 
 
 AUTH_PASSWORD_VALIDATORS = [
