@@ -17,14 +17,7 @@ try:
 except ImportError:
     pass
 
-# MongoDB setup (lazy-loaded)
-try:
-    from mongoengine import connect, disconnect
-    MONGODB_URI = os.environ.get('MONGODB_URI')
-    if MONGODB_URI:
-        connect(host=MONGODB_URI, connect=False)
-except ImportError:
-    pass
+# MongoDB setup will be done after settings are loaded
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -92,12 +85,26 @@ MONGODB_URI = os.environ.get(
     'mongodb+srv://epaper_user:epaper_pass@cluster0.mongodb.net/epaper?retryWrites=true&w=majority'
 )
 
+# Initialize MongoDB connection
+def init_mongodb():
+    try:
+        from mongoengine import connect, disconnect
+        disconnect()
+        connect(
+            host=MONGODB_URI,
+            serverSelectionTimeoutMS=5000,
+            connectTimeoutMS=10000,
+            retryWrites=True,
+            w='majority'
+        )
+    except Exception as e:
+        print(f"MongoDB connection error: {e}")
+
+# Call this after Django is fully loaded
 try:
-    from mongoengine import connect, disconnect
-    disconnect()
-    connect(host=MONGODB_URI)
+    init_mongodb()
 except Exception as e:
-    print(f"MongoDB connection warning: {e}")
+    print(f"Failed to initialize MongoDB: {e}")
 
 # Keep DATABASES for Django auth compatibility (uses SQLite locally for sessions)
 DATABASES = {

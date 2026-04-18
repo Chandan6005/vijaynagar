@@ -6,9 +6,18 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from datetime import datetime
 import cloudinary.uploader
-from mongoengine import Q as MongoQ
+from mongoengine import Q as MongoQ, connect
 from .models import Edition
 from .forms import EditionForm, AdminLoginForm, SignUpForm
+
+
+def ensure_mongodb_connection():
+    """Ensure MongoDB is connected before operations"""
+    try:
+        from django.conf import settings
+        connect(host=settings.MONGODB_URI, connect=False)
+    except Exception as e:
+        pass
 
 
 def is_admin(user):
@@ -17,6 +26,7 @@ def is_admin(user):
 
 def home(request):
     """List published editions with search and filter"""
+    ensure_mongodb_connection()
     try:
         editions = Edition.objects(is_published=True)
     except Exception as e:
@@ -68,6 +78,7 @@ def home(request):
 
 def edition_detail(request, pk):
     """Display a single edition and increment view count"""
+    ensure_mongodb_connection()
     try:
         edition = Edition.objects.get(id=pk, is_published=True)
         # Increment view count
@@ -86,6 +97,7 @@ def edition_detail(request, pk):
 @require_GET
 def api_editions(request):
     """API endpoint for fetching published editions"""
+    ensure_mongodb_connection()
     try:
         editions = Edition.objects(is_published=True).order_by('-edition_date', '-created_at')[:50]
     except Exception:
@@ -117,6 +129,7 @@ def api_editions(request):
 @require_GET
 def api_edition_detail(request, pk):
     """API endpoint for a single edition"""
+    ensure_mongodb_connection()
     try:
         edition = Edition.objects.get(id=pk, is_published=True)
         return JsonResponse({
@@ -156,6 +169,7 @@ def admin_login(request):
 @user_passes_test(is_admin, login_url='/admin-login/')
 def admin_dashboard(request):
     """Admin dashboard with stats"""
+    ensure_mongodb_connection()
     try:
         editions = Edition.objects()
         published_count = Edition.objects(is_published=True).count()
@@ -205,6 +219,8 @@ def edition_upload(request):
         form = EditionForm(request.POST, request.FILES)
         if form.is_valid():
             try:
+                ensure_mongodb_connection()
+                
                 # Upload PDF to Cloudinary
                 pdf_file = request.FILES.get('pdf_file')
                 pdf_response = cloudinary.uploader.upload(
@@ -250,6 +266,7 @@ def edition_upload(request):
 @user_passes_test(is_admin, login_url='/admin-login/')
 def edition_edit(request, pk):
     """Edit an existing edition"""
+    ensure_mongodb_connection()
     try:
         edition = Edition.objects.get(id=pk)
     except Edition.DoesNotExist:
@@ -306,6 +323,7 @@ def edition_edit(request, pk):
 @user_passes_test(is_admin, login_url='/admin-login/')
 def edition_delete(request, pk):
     """Delete an edition"""
+    ensure_mongodb_connection()
     try:
         edition = Edition.objects.get(id=pk)
     except Edition.DoesNotExist:
