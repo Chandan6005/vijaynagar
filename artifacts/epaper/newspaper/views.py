@@ -48,13 +48,13 @@ def home(request):
             pass
 
     # Sort editions
-    if sort == 'oldest':
-        editions = editions.order_by('edition_date', '-created_at')
-    else:
-        editions = editions.order_by('-edition_date', '-created_at')
+    # if sort == 'oldest':
+    #     editions = editions.order_by('edition_date', '-created_at')
+    # else:
+    #     editions = editions.order_by('-edition_date', '-created_at')
 
-    editions = list(editions)
-    latest = editions[0] if editions else None
+    # editions = list(editions)
+    # latest = editions[0] if editions else None
 
     return render(request, 'newspaper/home.html', {
         'editions': editions,
