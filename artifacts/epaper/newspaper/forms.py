@@ -13,7 +13,7 @@ class AdminLoginForm(forms.Form):
 
 
 class EditionForm(forms.Form):
-    """Form for uploading editions with Cloudinary file handling"""
+    """Form for uploading editions to Supabase Storage."""
     title = forms.CharField(
         max_length=200,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. The Daily Tribune - Morning Edition'})

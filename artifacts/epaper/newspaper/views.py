@@ -4,20 +4,11 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
+from django.db.models import F, Q, Sum
 from datetime import datetime
-import cloudinary.uploader
-from mongoengine import Q as MongoQ, connect
 from .models import Edition
 from .forms import EditionForm, AdminLoginForm, SignUpForm
-
-
-def ensure_mongodb_connection():
-    """Ensure MongoDB is connected before operations"""
-    try:
-        from django.conf import settings
-        connect(host=settings.MONGODB_URI, connect=False)
-    except Exception as e:
-        pass
+from .storage import upload_public_file
 
 
 def is_admin(user):
@@ -26,12 +17,11 @@ def is_admin(user):
 
 def home(request):
     """List published editions with search and filter"""
-    ensure_mongodb_connection()
     try:
-        editions = Edition.objects(is_published=True)
+        editions = Edition.objects.filter(is_published=True)
     except Exception as e:
         messages.warning(request, 'Database connection issue. Showing cached data.')
-        editions = []
+        editions = Edition.objects.none()
 
     query = request.GET.get('q', '').strip()
     from_date = request.GET.get('from_date', '').strip()
@@ -40,7 +30,7 @@ def home(request):
 
     # Apply search filter
     if query:
-        editions = editions.filter(MongoQ(title__icontains=query) | MongoQ(description__icontains=query))
+        editions = editions.filter(Q(title__icontains=query) | Q(description__icontains=query))
 
     # Apply date range filters
     if from_date:
@@ -57,14 +47,12 @@ def home(request):
         except:
             pass
 
-    # Sort editions
-    # if sort == 'oldest':
-    #     editions = editions.order_by('edition_date', '-created_at')
-    # else:
-    #     editions = editions.order_by('-edition_date', '-created_at')
+    if sort == 'oldest':
+        editions = editions.order_by('edition_date', '-created_at')
+    else:
+        editions = editions.order_by('-edition_date', '-created_at')
 
-    # editions = list(editions)
-    latest = editions[0] if editions else None
+    latest = editions.first()
 
     return render(request, 'newspaper/home.html', {
         'editions': editions,
@@ -78,12 +66,9 @@ def home(request):
 
 def edition_detail(request, pk):
     """Display a single edition and increment view count"""
-    ensure_mongodb_connection()
     try:
-        edition = Edition.objects.get(id=pk, is_published=True)
-        # Increment view count
-        edition.view_count += 1
-        edition.save()
+        Edition.objects.filter(pk=pk, is_published=True).update(view_count=F('view_count') + 1)
+        edition = Edition.objects.get(pk=pk, is_published=True)
     except Edition.DoesNotExist:
         return render(request, 'not-found.html', status=404)
 
@@ -97,18 +82,16 @@ def edition_detail(request, pk):
 @require_GET
 def api_editions(request):
     """API endpoint for fetching published editions"""
-    ensure_mongodb_connection()
     try:
-        editions = Edition.objects(is_published=True).order_by('-edition_date', '-created_at')[:50]
+        editions = Edition.objects.filter(is_published=True).order_by('-edition_date', '-created_at')
     except Exception:
-        editions = []
+        editions = Edition.objects.none()
 
     query = request.GET.get('q', '').strip()
     if query:
-        editions = Edition.objects(
-            is_published=True,
-            title__icontains=query
-        ).order_by('-edition_date', '-created_at')[:50]
+        editions = editions.filter(Q(title__icontains=query) | Q(description__icontains=query))
+
+    editions = editions[:50]
 
     data = [
         {
@@ -116,8 +99,8 @@ def api_editions(request):
             'title': edition.title,
             'edition_date': edition.edition_date.isoformat(),
             'description': edition.description or '',
-            'pdf_url': edition.pdf_file_url,
-            'cover_image_url': edition.cover_image_url,
+            'pdf_url': edition.pdf_file,
+            'cover_image_url': edition.cover_image,
             'detail_url': edition.get_absolute_url(),
             'view_count': edition.view_count,
         }
@@ -129,16 +112,15 @@ def api_editions(request):
 @require_GET
 def api_edition_detail(request, pk):
     """API endpoint for a single edition"""
-    ensure_mongodb_connection()
     try:
-        edition = Edition.objects.get(id=pk, is_published=True)
+        edition = Edition.objects.get(pk=pk, is_published=True)
         return JsonResponse({
             'id': str(edition.id),
             'title': edition.title,
             'edition_date': edition.edition_date.isoformat(),
             'description': edition.description or '',
-            'pdf_url': edition.pdf_file_url,
-            'cover_image_url': edition.cover_image_url,
+            'pdf_url': edition.pdf_file,
+            'cover_image_url': edition.cover_image,
             'view_count': edition.view_count,
             'detail_url': edition.get_absolute_url(),
         })
@@ -169,14 +151,13 @@ def admin_login(request):
 @user_passes_test(is_admin, login_url='/admin-login/')
 def admin_dashboard(request):
     """Admin dashboard with stats"""
-    ensure_mongodb_connection()
     try:
-        editions = Edition.objects()
-        published_count = Edition.objects(is_published=True).count()
-        draft_count = Edition.objects(is_published=False).count()
-        total_views = sum(e.view_count for e in editions)
+        editions = Edition.objects.all()
+        published_count = Edition.objects.filter(is_published=True).count()
+        draft_count = Edition.objects.filter(is_published=False).count()
+        total_views = editions.aggregate(total=Sum('view_count'))['total'] or 0
     except Exception:
-        editions = []
+        editions = Edition.objects.none()
         published_count = 0
         draft_count = 0
         total_views = 0
@@ -219,37 +200,32 @@ def edition_upload(request):
         form = EditionForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                ensure_mongodb_connection()
-                
-                # Upload PDF to Cloudinary
+                # Upload PDF to Supabase Storage.
                 pdf_file = request.FILES.get('pdf_file')
-                pdf_response = cloudinary.uploader.upload(
+                pdf_url = upload_public_file(
                     pdf_file,
-                    resource_type='raw',
-                    folder='epaper/pdfs',
-                    public_id=f"{form.cleaned_data['title'].replace(' ', '_')}"
+                    'pdfs',
+                    form.cleaned_data['title'],
                 )
-                pdf_url = pdf_response['secure_url']
 
                 # Upload cover image if provided
                 cover_url = None
                 if 'cover_image' in request.FILES:
                     cover_file = request.FILES.get('cover_image')
-                    cover_response = cloudinary.uploader.upload(
+                    cover_url = upload_public_file(
                         cover_file,
-                        folder='epaper/covers'
+                        'covers',
+                        form.cleaned_data['title'],
                     )
-                    cover_url = cover_response['secure_url']
 
-                # Create Edition in MongoDB
                 edition = Edition(
                     title=form.cleaned_data['title'],
                     edition_date=form.cleaned_data['edition_date'],
-                    pdf_file_url=pdf_url,
-                    cover_image_url=cover_url,
+                    pdf_file=pdf_url,
+                    cover_image=cover_url,
                     description=form.cleaned_data['description'],
                     is_published=form.cleaned_data['is_published'],
-                    uploaded_by_id=request.user.id,
+                    uploaded_by=request.user,
                 )
                 edition.save()
                 messages.success(request, f'Edition "{edition.title}" uploaded successfully!')
@@ -266,15 +242,15 @@ def edition_upload(request):
 @user_passes_test(is_admin, login_url='/admin-login/')
 def edition_edit(request, pk):
     """Edit an existing edition"""
-    ensure_mongodb_connection()
     try:
-        edition = Edition.objects.get(id=pk)
+        edition = Edition.objects.get(pk=pk)
     except Edition.DoesNotExist:
         messages.error(request, 'Edition not found.')
         return redirect('admin_dashboard')
 
     if request.method == 'POST':
         form = EditionForm(request.POST, request.FILES)
+        form.fields['pdf_file'].required = False
         if form.is_valid():
             try:
                 edition.title = form.cleaned_data['title']
@@ -285,24 +261,21 @@ def edition_edit(request, pk):
                 # Update PDF if new file uploaded
                 if 'pdf_file' in request.FILES:
                     pdf_file = request.FILES.get('pdf_file')
-                    pdf_response = cloudinary.uploader.upload(
+                    edition.pdf_file = upload_public_file(
                         pdf_file,
-                        resource_type='raw',
-                        folder='epaper/pdfs',
-                        public_id=f"{form.cleaned_data['title'].replace(' ', '_')}_v{int(datetime.now().timestamp())}"
+                        'pdfs',
+                        form.cleaned_data['title'],
                     )
-                    edition.pdf_file_url = pdf_response['secure_url']
 
                 # Update cover image if new file uploaded
                 if 'cover_image' in request.FILES:
                     cover_file = request.FILES.get('cover_image')
-                    cover_response = cloudinary.uploader.upload(
+                    edition.cover_image = upload_public_file(
                         cover_file,
-                        folder='epaper/covers'
+                        'covers',
+                        form.cleaned_data['title'],
                     )
-                    edition.cover_image_url = cover_response['secure_url']
 
-                edition.updated_at = datetime.utcnow()
                 edition.save()
                 messages.success(request, f'Edition "{edition.title}" updated successfully!')
                 return redirect('admin_dashboard')
@@ -315,6 +288,7 @@ def edition_edit(request, pk):
             'description': edition.description,
             'is_published': edition.is_published,
         })
+        form.fields['pdf_file'].required = False
 
     return render(request, 'newspaper/edition_form.html', {'form': form, 'action': 'Edit'})
 
@@ -323,9 +297,8 @@ def edition_edit(request, pk):
 @user_passes_test(is_admin, login_url='/admin-login/')
 def edition_delete(request, pk):
     """Delete an edition"""
-    ensure_mongodb_connection()
     try:
-        edition = Edition.objects.get(id=pk)
+        edition = Edition.objects.get(pk=pk)
     except Edition.DoesNotExist:
         messages.error(request, 'Edition not found.')
         return redirect('admin_dashboard')

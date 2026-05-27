@@ -1,23 +1,9 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import dj_database_url
 
 load_dotenv()
-
-# Cloudinary config (lazy-loaded to avoid import errors during build)
-try:
-    import cloudinary
-    import cloudinary.uploader
-    import cloudinary.api
-    cloudinary.config(
-        cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-        api_key=os.environ.get('CLOUDINARY_API_KEY'),
-        api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
-    )
-except ImportError:
-    pass
-
-# MongoDB setup will be done after settings are loaded
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,8 +27,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary_storage',
-    'cloudinary',
     'newspaper',
 ]
 
@@ -79,47 +63,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'epaper_project.wsgi.application'
 
-# MongoDB Atlas Configuration
-MONGODB_URI = os.environ.get(
-    'MONGODB_URI',
-    'mongodb+srv://epaper_user:epaper_pass@cluster0.mongodb.net/epaper?retryWrites=true&w=majority'
-)
+# Supabase provides the Postgres database. Set DATABASE_URL to the Supabase
+# connection string, for example:
+# postgresql://postgres.<project-ref>:<password>@aws-0-...pooler.supabase.com:6543/postgres
+DATABASE_URL = os.environ.get('DATABASE_URL') or os.environ.get('SUPABASE_DATABASE_URL')
 
-# Initialize MongoDB connection
-def init_mongodb():
-    try:
-        from mongoengine import connect, disconnect
-        disconnect()
-        connect(
-            host=MONGODB_URI,
-            serverSelectionTimeoutMS=5000,
-            connectTimeoutMS=10000,
-            retryWrites=True,
-            w='majority'
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
         )
-    except Exception as e:
-        print(f"MongoDB connection error: {e}")
-
-# Call this after Django is fully loaded
-try:
-    init_mongodb()
-except Exception as e:
-    print(f"Failed to initialize MongoDB: {e}")
-
-# Keep DATABASES for Django auth compatibility (uses SQLite locally for sessions)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
-
-# Cloudinary Configuration
-try:
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    CLOUDINARY_STORAGE = {'FOLDER': 'epaper'}
-except Exception:
-    pass
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 MEDIA_URL = '/media/'
 

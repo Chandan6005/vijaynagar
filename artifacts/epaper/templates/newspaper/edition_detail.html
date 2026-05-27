@@ -132,10 +132,10 @@
     <div class="viewer-toolbar">
         <span class="viewer-title">{{ edition.title }}</span>
         <div class="viewer-actions">
-            <a href="{{ edition.pdf_file.url }}" download class="btn btn-outline btn-sm">
+            <a href="{{ edition.pdf_file }}" download class="btn btn-outline btn-sm">
                 Download PDF
             </a>
-            <a href="{{ edition.pdf_file.url }}" target="_blank" class="btn btn-primary btn-sm">
+            <a href="{{ edition.pdf_file }}" target="_blank" class="btn btn-primary btn-sm">
                 Open in New Tab
             </a>
         </div>
@@ -155,7 +155,7 @@
         </div>
     </div>
 
-    <iframe class="pdf-embed" src="{{ edition.pdf_file.url }}" title="{{ edition.title }}" allowfullscreen>
+    <iframe class="pdf-embed" src="{{ edition.pdf_file }}" title="{{ edition.title }}" allowfullscreen>
     </iframe>
 </div>
 {% endblock %}
@@ -173,7 +173,7 @@
         mobileMsg.innerHTML = `
             <p style="text-align: center; padding: 20px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px;">
                 PDF viewing is not supported on mobile browsers. 
-                <a href="{{ edition.pdf_file.url }}" download style="color: #007bff; text-decoration: underline;">Download the PDF</a> to view it.
+                <a href="{{ edition.pdf_file }}" download style="color: #007bff; text-decoration: underline;">Download the PDF</a> to view it.
             </p>
         `;
         toolbar.insertAdjacentElement('afterend', mobileMsg);

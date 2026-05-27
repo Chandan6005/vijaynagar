@@ -1,5 +1,10 @@
 from django.contrib import admin
+from .models import Edition
 
-# MongoEngine models cannot be registered with Django admin
-# Edition is now a MongoEngine Document and is managed through custom views
-# See newspaper/views.py for admin_dashboard() and edition_upload/edit/delete views
+
+@admin.register(Edition)
+class EditionAdmin(admin.ModelAdmin):
+    list_display = ('title', 'edition_date', 'is_published', 'view_count', 'uploaded_by')
+    list_filter = ('is_published', 'edition_date')
+    search_fields = ('title', 'description')
+    readonly_fields = ('created_at', 'updated_at')
